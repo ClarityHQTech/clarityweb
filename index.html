@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1A1410">
+<title>ClarityHQ · Brand Context Protocol</title>
+<meta property="og:title" content="ClarityHQ · Brand Context Protocol">
+<meta property="og:description" content="Living brand intelligence inside Slack. One protocol, every tool on the same page.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F5F5F0; --cream-2:#EDEBE2; --paper:#FCFAF5;
+    --ink:#1A1410; --stone:#6B5C4E; --sand:#B8A68A;
+    --sage:#A8B5A0; --sage-deep:#6f8763; --sage-ink:#3d5536;
+    --terra-deep:#c07d6f; --terra-ink:#8c4536;
+    --gold:#D4AF37; --gold-soft:#e6cf8a;
+    --line:rgba(26,20,16,.10); --line-2:rgba(26,20,16,.18);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{min-height:100%}
+  body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 20px;position:relative;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");mix-blend-mode:multiply}
+
+  .wrap{position:relative;z-index:1;max-width:880px;width:100%}
+  .header{text-align:center;margin-bottom:54px}
+  .glyph{width:60px;height:60px;border-radius:14px;background:var(--ink);display:grid;place-items:center;margin:0 auto 22px}
+  .glyph svg{width:32px;height:32px}
+  .wmark{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.28em;color:var(--stone);text-transform:uppercase;margin-bottom:10px}
+  .header h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(32px, 5vw, 46px);line-height:1.1;letter-spacing:-.015em;margin-bottom:14px}
+  .header h1 em{font-style:italic;color:var(--terra-ink)}
+  .header p{font-size:15px;color:var(--stone);max-width:520px;margin:0 auto;line-height:1.6}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:18px;margin-bottom:32px}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px 24px 22px;text-decoration:none;color:var(--ink);transition:.22s cubic-bezier(.2,.7,.3,1);position:relative;overflow:hidden;display:flex;flex-direction:column;gap:8px}
+  .card:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(26,20,16,.10);border-color:var(--sand)}
+  .card .badge{position:absolute;top:14px;right:14px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--stone);text-transform:uppercase;padding:3px 8px;border-radius:30px;border:1px solid var(--line);background:var(--cream)}
+  .card.recommended .badge{background:var(--gold);border-color:var(--gold);color:var(--ink);font-weight:700}
+  .card .ico{font-size:30px;line-height:1;margin-bottom:6px}
+  .card h2{font-family:'Fraunces',serif;font-weight:600;font-size:22px;letter-spacing:-.01em}
+  .card p{font-size:13px;color:var(--stone);line-height:1.55;flex:1}
+  .card .cta{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--terra-ink);margin-top:6px;font-family:'JetBrains Mono',monospace}
+  .card .cta::after{content:'→';transition:transform .22s}
+  .card:hover .cta::after{transform:translateX(4px)}
+
+  .footer{text-align:center;padding-top:24px;border-top:1px solid var(--line)}
+  .footer p{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--sand);text-transform:uppercase}
+  .footer .endpoint{margin-top:6px;font-size:11px;color:var(--stone);text-transform:none;letter-spacing:0}
+  .footer .endpoint code{background:var(--cream-2);padding:2px 7px;border-radius:4px;font-size:11px;color:var(--terra-ink)}
+
+  /* loading overlay if auto-redirect is in flight */
+  .redirect{position:fixed;inset:0;background:var(--cream);z-index:99;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+  .redirect.show{display:flex}
+  .redirect .spin{width:24px;height:24px;border:2.5px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+  .redirect p{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--stone);text-transform:uppercase}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  @media (max-width:600px){
+    .header{margin-bottom:36px}
+    .cards{gap:14px;margin-bottom:24px}
+    .card{padding:22px 20px}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="glyph">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 1 0 9 9" stroke="#F5F5F0" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="3" fill="#D4AF37"/></svg>
+    </div>
+    <div class="wmark">ClarityHQ · Brand Context Protocol</div>
+    <h1>One brand. One protocol. <em>Every tool on the same page.</em></h1>
+    <p>Living brand intelligence — set up, enforced, and put to work inside Slack. Pick your view to see the demo.</p>
+  </div>
+
+  <div class="cards">
+    <a class="card" id="cardDesktop" href="/desktop">
+      <span class="badge" id="badgeDesktop">Desktop</span>
+      <div class="ico">🖥</div>
+      <h2>Desktop demo</h2>
+      <p>Full Slack desktop UI — workspace rail, sidebar, centered channel pane. Best on laptop or external display.</p>
+      <span class="cta">Open desktop demo</span>
+    </a>
+
+    <a class="card" id="cardMobile" href="/mobile">
+      <span class="badge" id="badgeMobile">Mobile</span>
+      <div class="ico">📱</div>
+      <h2>Mobile demo</h2>
+      <p>Authentic Slack mobile chrome — swipe drawer, bottom-sheet config, touch-tuned. Best on phone.</p>
+      <span class="cta">Open mobile demo</span>
+    </a>
+  </div>
+
+  <div class="footer">
+    <p>Brand Context Protocol · v1.0.1</p>
+    <p class="endpoint">Live BCP endpoint: <code>api.brandcontextprotocol.com/clarityhq</code></p>
+  </div>
+
+</div>
+
+<div class="redirect" id="redirect">
+  <div class="spin"></div>
+  <p>Opening <span id="redirectTarget">demo</span>…</p>
+</div>
+
+<script>
+  // Auto-detect viewport / device. If clear-cut mobile, redirect after a beat.
+  // If desktop, just highlight the desktop card. User can always override by tapping the other.
+  const isTouchMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && window.innerWidth < 900;
+  const params = new URLSearchParams(window.location.search);
+  const noRedirect = params.has('stay');
+
+  if (isTouchMobile) {
+    document.getElementById('badgeMobile').textContent = 'Recommended';
+    document.getElementById('cardMobile').classList.add('recommended');
+    if (!noRedirect) {
+      document.getElementById('redirectTarget').textContent = 'mobile demo';
+      document.getElementById('redirect').classList.add('show');
+      setTimeout(() => { window.location.replace('/mobile'); }, 700);
+    }
+  } else {
+    document.getElementById('badgeDesktop').textContent = 'Recommended';
+    document.getElementById('cardDesktop').classList.add('recommended');
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1A1410">
+<title>ClarityHQ · BCP — Mobile Video</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,400&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F5F5F0; --cream-2:#EDEBE2; --cream-3:#E4E1D6;
+    --paper:#FCFAF5; --ink:#1A1410; --ink-2:#1C1C1C; --ink-soft:#2a221c;
+    --stone:#6B5C4E; --sand:#B8A68A;
+    --steel:#8B9A9C; --sage:#A8B5A0; --sage-deep:#6f8763; --sage-ink:#3d5536;
+    --terra:#D4A59A; --terra-deep:#c07d6f; --terra-ink:#8c4536;
+    --gold:#D4AF37; --gold-soft:#e6cf8a; --gold-ink:#7a6418;
+    --line:rgba(26,20,16,.10); --line-2:rgba(26,20,16,.18);
+    --sl-main:#FCFAF5; --sl-card:#FFFFFF;
+    --sl-faint:rgba(26,20,16,.42);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden}
+  body{background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;font-size:14px}
+
+  .shell{display:flex;flex-direction:column;height:100vh;height:100dvh;background:var(--sl-main)}
+
+  .topbar{flex:none;background:var(--ink);color:var(--cream);padding:10px 14px;display:flex;align-items:center;gap:10px;padding-top:max(10px, env(safe-area-inset-top))}
+  .topbar .burger{width:30px;height:30px;display:grid;place-items:center;border:none;background:transparent;color:var(--cream);font-size:18px;border-radius:7px}
+  .topbar .chinfo{flex:1;min-width:0}
+  .topbar .chinfo .nm{font-family:'Fraunces',serif;font-weight:600;font-size:15px;line-height:1.1;display:flex;align-items:center;gap:5px}
+  .topbar .chinfo .nm .h{color:var(--gold-soft);font-weight:400}
+  .topbar .chinfo .nm .mode{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.18em;background:var(--gold);color:var(--ink);padding:2px 6px;border-radius:20px;font-weight:700;margin-left:6px;text-transform:uppercase}
+  .topbar .chinfo .sub{font-size:9.5px;color:var(--gold-soft);opacity:.75;margin-top:1px;letter-spacing:.06em;font-family:'JetBrains Mono',monospace;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .topbar .actions{display:flex;gap:2px}
+  .topbar .actions button{width:32px;height:32px;border:none;background:transparent;color:var(--cream);font-size:13px;border-radius:7px;cursor:pointer}
+
+  /* TRANSPORT BAR */
+  .tbar{flex:none;background:var(--cream);border-bottom:1px solid var(--line);padding:9px 14px;display:flex;align-items:center;gap:9px}
+  .tbtn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line-2);background:var(--paper);color:var(--ink);display:grid;place-items:center;font-size:13px;cursor:pointer;flex:none;transition:.15s}
+  .tbtn:active{background:var(--cream-2);transform:scale(.94)}
+  .tbtn.play{width:40px;height:40px;background:var(--ink);border:none;color:var(--cream);font-size:14px;border-radius:10px}
+  .tbtn.play:active{background:var(--terra-ink)}
+  .pwrap{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}
+  .pmeta{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.06em;color:var(--stone);text-transform:uppercase}
+  .pmeta b{color:var(--terra-ink);font-weight:600}
+  .pbar{height:3px;border-radius:3px;background:var(--cream-3);overflow:hidden}
+  .pfill{height:100%;width:0;background:var(--terra-deep);border-radius:3px;transition:width .4s}
+
+  /* MESSAGES */
+  .msgs{flex:1;overflow-y:auto;padding:12px 14px;background:var(--sl-main);-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
+  .msgs::-webkit-scrollbar{width:0}
+  .day{display:flex;align-items:center;gap:10px;margin:6px 0 10px}
+  .day::before,.day::after{content:'';flex:1;height:1px;background:var(--line)}
+  .day span{font-size:10px;font-weight:700;color:var(--stone);border:1px solid var(--line);border-radius:20px;padding:2px 9px;background:var(--sl-main)}
+
+  .m{display:flex;gap:8px;padding:6px 0;animation:rise .3s cubic-bezier(.2,.7,.3,1)}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .m .av{width:30px;height:30px;border-radius:7px;flex:none;display:grid;place-items:center;font-weight:700;font-size:12px}
+  .m.app .av{background:linear-gradient(140deg,#3a2f24,#1c1611)}
+  .m.app .av svg{width:17px;height:17px}
+  .m.user .av{background:var(--sage-deep);color:#fff}
+  .m .bd{flex:1;min-width:0}
+  .m .meta{display:flex;align-items:baseline;gap:6px;margin-bottom:1px;flex-wrap:wrap}
+  .m .meta .who{font-size:12.5px;font-weight:700;color:var(--ink)}
+  .m .meta .badge{font-size:7.5px;background:var(--stone);color:var(--cream);padding:1px 4px;border-radius:3px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+  .m .meta .t{font-size:10px;color:var(--sl-faint)}
+  .m .tx{font-size:13px;color:var(--ink-soft);line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
+  .m .tx b{color:var(--ink);font-weight:600}
+  .m .tx .term{color:var(--terra-ink);font-weight:600}
+  .attach{margin-top:5px;font-size:11px;color:var(--terra-ink);background:rgba(192,125,111,.08);border:1px solid rgba(192,125,111,.25);border-radius:6px;padding:6px 9px;display:inline-flex;gap:6px;align-items:center}
+
+  .typing{display:flex;gap:8px;padding:6px 0}
+  .typing .av{width:30px;height:30px;border-radius:7px;background:linear-gradient(140deg,#3a2f24,#1c1611);display:grid;place-items:center}
+  .typing .av svg{width:17px;height:17px}
+  .typing .bub{background:var(--cream-2);border-radius:11px;padding:9px 12px;display:flex;gap:4px;align-items:center}
+  .typing .bub i{width:5px;height:5px;border-radius:50%;background:var(--stone);animation:bnc 1.3s infinite}
+  .typing .bub i:nth-child(2){animation-delay:.18s}.typing .bub i:nth-child(3){animation-delay:.36s}
+  @keyframes bnc{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-4px);opacity:1}}
+
+  /* CARDS */
+  .card{margin-top:7px;background:var(--sl-card);border:1px solid var(--line);border-left:3px solid var(--sand);border-radius:9px;padding:11px 12px;animation:rise .35s .08s both;box-shadow:0 1px 4px rgba(26,20,16,.04)}
+  .card.pass{border-left-color:var(--sage-deep)}
+  .card.fail{border-left-color:var(--terra-ink)}
+  .card.bcp{border-left-color:var(--gold)}
+  .ch{font-size:11px;font-weight:700;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .ch .ico{font-size:12px}
+  .ch .badge{font-size:7.5px;background:var(--stone);color:var(--cream);padding:1px 4px;border-radius:3px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+  .crow{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-top:1px solid var(--line);font-size:11.5px}
+  .crow:first-of-type{border-top:none}
+  .crow .k{color:var(--stone);flex:none}.crow .v{color:var(--ink);font-weight:500;text-align:right}
+  .cbtns{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+  .cbtn{font-size:11px;font-weight:600;padding:7px 11px;border-radius:7px;border:1px solid var(--line-2);background:var(--cream);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center}
+  .cbtn.pri{background:var(--sage-deep);border:none;color:#fff}
+  .cbtn.terra{background:var(--terra-ink);border:none;color:#fff}
+  .cbtn.sel{border-color:var(--gold);background:rgba(212,175,55,.16);color:var(--gold-ink)}
+  .cbtn.link{border:none;background:none;color:var(--terra-ink);padding-left:0;text-decoration:underline}
+
+  .opt{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-top:6px;background:var(--cream)}
+  .opt.sel{border-color:var(--gold);background:rgba(212,175,55,.14)}
+  .opt .ico{font-size:15px;flex:none}
+  .opt .ot{flex:1;min-width:0}.opt .ot .h{font-size:11.5px;font-weight:600;color:var(--ink)}.opt .ot .d{font-size:10.5px;color:var(--stone);line-height:1.4}
+  .opt .pct{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--sage-deep);flex:none}
+
+  .bvc-top{display:flex;gap:11px;margin-bottom:8px;align-items:center}
+  .bvc-score{flex:none;width:62px;text-align:center;background:var(--cream-2);border-radius:9px;padding:8px 4px}
+  .bvc-score .n{font-family:'Fraunces',serif;font-size:24px;font-weight:600;line-height:1}
+  .bvc-score .n.bad{color:var(--terra-ink)}.bvc-score .n.good{color:var(--sage-deep)}
+  .bvc-score .o{font-size:8.5px;color:var(--stone);margin-top:2px}
+  .bvc-meta{flex:1;min-width:0}
+  .bvc-dec{font-size:13px;font-weight:700;display:flex;align-items:center;gap:5px;margin-bottom:3px}
+  .bvc-dec.fail{color:var(--terra-ink)}.bvc-dec.pass{color:var(--sage-deep)}
+  .bvc-sub{font-size:10px;color:var(--stone);line-height:1.5}
+  .flag{display:flex;gap:7px;padding:6px 0;border-top:1px solid var(--line);font-size:11px;align-items:flex-start}
+  .flag .ft{flex:none;font-size:8.5px;font-weight:700;padding:2px 5px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+  .flag .ft.block{background:rgba(192,125,111,.18);color:var(--terra-ink)}
+  .flag .ft.warn{background:rgba(212,175,55,.22);color:var(--gold-ink)}
+  .flag .fb{flex:1;color:var(--ink-soft);line-height:1.45}
+  .flag .fb .w{color:var(--terra-ink);font-weight:600}
+  .flag .fb .arrow{color:var(--sand)}
+  .flag .fb .alt{color:var(--sage-deep);font-weight:500}
+  .checked{margin-top:8px;font-size:11px;color:var(--ink-soft);background:rgba(192,125,111,.06);border-radius:6px;padding:8px 10px;border-left:2px solid var(--terra-deep);line-height:1.5}
+  .checked .strike{color:var(--terra-ink);text-decoration:line-through;text-decoration-color:rgba(140,69,54,.6)}
+  .rewrite{margin-top:8px;font-size:11.5px;color:var(--ink);background:rgba(168,181,160,.14);border-radius:6px;padding:8px 10px;border-left:2px solid var(--sage-deep);line-height:1.5;font-weight:500}
+
+  .codeblk{margin-top:7px;background:var(--ink);border-radius:7px;padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--gold-soft);display:flex;align-items:center;justify-content:space-between;gap:8px;word-break:break-all}
+  .codeblk .u{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+
+  .palette{display:flex;gap:5px;margin-top:7px}
+  .sw{flex:1;height:26px;border-radius:5px;position:relative;border:1px solid var(--line)}
+  .sw span{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:6.5px;font-weight:700}
+
+  .brandrow{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-top:6px;background:var(--cream)}
+  .brandrow.sel{border-color:var(--gold);background:rgba(212,175,55,.14)}
+  .brandrow .bi{width:28px;height:28px;border-radius:7px;flex:none;display:grid;place-items:center;font-family:'Fraunces',serif;font-weight:600;color:#fff;font-size:13px}
+  .brandrow .bt{flex:1;min-width:0}.brandrow .bt .h{font-size:11.5px;font-weight:700;color:var(--ink)}.brandrow .bt .d{font-size:10.5px;color:var(--stone)}
+  .brandrow .tag{font-size:8.5px;font-family:'JetBrains Mono',monospace;padding:1px 6px;border-radius:20px;border:1px solid var(--line);color:var(--stone);flex:none}
+
+  .posts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:7px}
+  .post{aspect-ratio:4/5;border-radius:6px;overflow:hidden;position:relative;border:1px solid var(--line)}
+  .post .g{position:absolute;inset:0}
+  .post .lab{position:absolute;left:4px;bottom:4px;font-size:7.5px;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+  .post .tick{position:absolute;right:4px;top:4px;width:14px;height:14px;border-radius:50%;background:var(--sage-deep);color:#fff;display:grid;place-items:center;font-size:9px;opacity:0;transition:.2s;transform:scale(.6)}
+  .post.ok .tick{opacity:1;transform:scale(1)}
+  .post.regen .g{animation:flash 1s ease}
+  @keyframes flash{0%{filter:brightness(.4) blur(3px)}100%{filter:none}}
+
+  /* ENGINE */
+  .engine{flex:none;background:var(--cream-2);border-top:1px solid var(--line);padding:7px 14px;display:flex;flex-direction:column;gap:4px}
+  .eng-head{display:flex;justify-content:space-between;align-items:center}
+  .eng-head .lbl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.18em;color:var(--stone);text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:6px}
+  .eng-head .lbl .d{width:5px;height:5px;border-radius:50%;background:var(--sage-deep);animation:pd 2s infinite}
+  @keyframes pd{50%{opacity:.4}}
+  .eng-head .toggle{font-size:14px;color:var(--stone);background:none;border:none;cursor:pointer;padding:2px 6px;transition:.2s}
+  .eng-head .toggle.open{transform:rotate(180deg)}
+  .eng-log{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--stone);overflow:hidden;display:flex;flex-direction:column;gap:2px;max-height:42px;transition:max-height .3s}
+  .eng-log.open{max-height:180px;overflow-y:auto}
+  .eng-log .lline{display:flex;gap:7px;align-items:center;animation:rise .25s ease;white-space:nowrap}
+  .eng-log .lline .ts{color:var(--sand);flex:none;font-size:9px}
+  .eng-log .lline .ag{font-weight:600;flex:none}
+  .eng-log .lline .ag.icp{color:var(--sage-ink)}
+  .eng-log .lline .ag.brand{color:var(--terra-ink)}
+  .eng-log .lline .ag.bcp{color:var(--gold-ink)}
+  .eng-log .lline .ag.campaign{color:var(--sage-deep)}
+  .eng-log .lline .ag.creative{color:#a8503f}
+  .eng-log .lline .ag.outreach{color:#4b6a72}
+  .eng-log .lline .ag.core{color:var(--ink)}
+  .eng-log .lline .mk{color:var(--terra-ink);flex:none}
+  .eng-log .lline.ok .mk{color:var(--sage-deep)}
+  .eng-log .lline .tx{overflow:hidden;text-overflow:ellipsis;font-size:10px}
+  .eng-tools{display:flex;gap:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-top:2px}
+  .eng-tools::-webkit-scrollbar{display:none}
+  .chip{flex:none;font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 7px;border-radius:20px;border:1px solid var(--line);color:var(--sand);opacity:.5;transition:.3s;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+  .chip.fire{opacity:1;border-color:var(--sage-deep);color:var(--sage-ink);background:rgba(168,181,160,.15)}
+  .chip .d{width:3px;height:3px;border-radius:50%;background:currentColor}
+
+  /* COMPOSER (display-only, shows auto-typing) */
+  .comp{flex:none;background:var(--sl-main);border-top:1px solid var(--line);padding:8px 12px 12px;padding-bottom:max(12px, env(safe-area-inset-bottom))}
+  .comp-box{border:1.5px solid var(--line-2);border-radius:14px;background:var(--sl-main)}
+  .comp-row{display:flex;align-items:center;gap:4px;padding:6px 8px 6px 12px}
+  .comp-in{flex:1;font-size:14px;color:var(--sand);min-height:24px;padding:8px 0;line-height:1.45;word-break:break-word}
+  .comp-in.typing-txt{color:var(--ink)}
+  .comp-in .caret{display:inline-block;width:1.5px;height:14px;background:var(--terra-ink);margin-left:1px;vertical-align:-2px;animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .comp-send{width:36px;height:36px;border-radius:50%;background:var(--cream-2);color:var(--sand);border:none;display:grid;place-items:center;font-size:14px;flex:none}
+  .comp-send.live{background:var(--sage-deep);color:#fff}
+
+  /* DRAWER */
+  .drw-overlay{position:fixed;inset:0;background:rgba(26,20,16,.45);z-index:90;opacity:0;pointer-events:none;transition:.3s}
+  .drw-overlay.show{opacity:1;pointer-events:all}
+  .drw{position:fixed;left:-280px;top:0;bottom:0;width:280px;background:var(--ink);z-index:91;transition:left .3s cubic-bezier(.2,.7,.3,1);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
+  .drw.open{left:0}
+  .drw-head{padding:16px 18px 12px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:11px}
+  .drw-head .ws{width:38px;height:38px;border-radius:10px;background:linear-gradient(140deg,#3a2f24,#1c1611);border:2px solid var(--gold);display:grid;place-items:center;color:var(--gold-soft);font-family:'Fraunces',serif;font-weight:600;font-size:16px}
+  .drw-head .wt{font-family:'Fraunces',serif;font-weight:600;font-size:17px;color:#fff}
+  .drw-nav{flex:1;overflow-y:auto;padding:8px 10px}
+  .drw-sec{font-size:10px;color:rgba(255,255,255,.4);padding:11px 8px 4px;font-weight:600;letter-spacing:.04em}
+  .drw-ch{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;font-size:13.5px;color:rgba(255,255,255,.7)}
+  .drw-ch .h{color:rgba(255,255,255,.35)}
+  .drw-ch.active{background:var(--gold);color:var(--ink);font-weight:600}
+  .drw-ch.active .h{color:var(--ink)}
+
+  /* END CARD */
+  .endcard{position:fixed;inset:0;z-index:200;background:rgba(252,250,245,.96);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;animation:rise .5s}
+  .endcard.show{display:flex}
+  .endbox{max-width:340px;text-align:center;padding:0 20px}
+  .endbox .gl{width:46px;height:46px;margin:0 auto 18px;border-radius:11px;background:var(--ink);display:grid;place-items:center}
+  .endbox .gl svg{width:25px;height:25px}
+  .endbox h2{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--ink);line-height:1.15;margin-bottom:10px}
+  .endbox h2 em{font-style:italic;color:var(--terra-ink)}
+  .endbox p{font-size:12.5px;color:var(--stone);margin-bottom:20px;line-height:1.55}
+  .endstats{display:flex;justify-content:center;gap:22px;margin-bottom:22px}
+  .es .n{font-family:'Fraunces',serif;font-weight:600;font-size:20px;color:var(--terra-ink)}
+  .es .l{font-size:9px;color:var(--sand);letter-spacing:.1em;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
+  .replay{font-size:13px;font-weight:600;padding:10px 22px;border-radius:30px;border:none;cursor:pointer;background:var(--ink);color:var(--cream)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <div class="topbar">
+    <button class="burger" id="drwOpen">≡</button>
+    <div class="chinfo">
+      <div class="nm"><span class="h">#</span> clarity <span class="mode">Video</span></div>
+      <div class="sub" id="chapterLbl">CH 1 · BUILD INTELLIGENCE LAYER</div>
+    </div>
+    <div class="actions"><button id="opSwitch" title="Operator">A</button></div>
+  </div>
+
+  <!-- TRANSPORT -->
+  <div class="tbar">
+    <button class="tbtn" id="restart" title="Restart">⟲</button>
+    <button class="tbtn" id="prev" title="Back">◀</button>
+    <button class="tbtn play" id="play" title="Play / Pause">▶</button>
+    <button class="tbtn" id="next" title="Next">▶▏</button>
+    <div class="pwrap">
+      <div class="pmeta"><span>BCP demo</span><b id="counter">00 / 00</b></div>
+      <div class="pbar"><div class="pfill" id="progfill"></div></div>
+    </div>
+  </div>
+
+  <!-- MESSAGES -->
+  <div class="msgs" id="msgs"><div class="day"><span>Today</span></div></div>
+
+  <!-- ENGINE -->
+  <div class="engine">
+    <div class="eng-head">
+      <span class="lbl" id="engLbl"><span class="d"></span>Agentic Engine</span>
+      <button class="toggle" id="engToggle">▾</button>
+    </div>
+    <div class="eng-log" id="engLog"></div>
+    <div class="eng-tools">
+      <span class="chip" data-tool="apify"><span class="d"></span>Apify</span>
+      <span class="chip" data-tool="serper"><span class="d"></span>Serper</span>
+      <span class="chip" data-tool="nano-banana"><span class="d"></span>Nano Banana</span>
+      <span class="chip" data-tool="bcp"><span class="d"></span>BCP</span>
+      <span class="chip" data-tool="claude-code"><span class="d"></span>Claude Code</span>
+      <span class="chip" data-tool="hubspot"><span class="d"></span>HubSpot</span>
+      <span class="chip" data-tool="smartlead"><span class="d"></span>Smartlead</span>
+      <span class="chip" data-tool="whatsapp"><span class="d"></span>WhatsApp</span>
+    </div>
+  </div>
+
+  <!-- COMPOSER -->
+  <div class="comp">
+    <div class="comp-box">
+      <div class="comp-row">
+        <div class="comp-in" id="compIn">Message #clarity</div>
+        <button class="comp-send" id="sendBtn">➤</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- DRAWER -->
+<div class="drw-overlay" id="drwOverlay"></div>
+<div class="drw" id="drw">
+  <div class="drw-head"><div class="ws">C</div><div class="wt">Clarity</div></div>
+  <div class="drw-nav">
+    <div class="drw-sec">Channels</div>
+    <div class="drw-ch"><span class="h">#</span>clarity-brand</div>
+    <div class="drw-ch"><span class="h">#</span>clarity-social</div>
+    <div class="drw-ch"><span class="h">#</span>clarity-product</div>
+    <div class="drw-ch"><span class="h">#</span>growth-execution</div>
+    <div class="drw-ch active"><span class="h">#</span>clarity</div>
+    <div class="drw-ch"><span class="h">#</span>all-clarity</div>
+    <div class="drw-sec">Direct messages</div>
+    <div class="drw-ch"><span class="h" style="color:var(--sage)">●</span>Yash Vats</div>
+    <div class="drw-ch"><span class="h" style="color:var(--sand)">●</span>Alex Scholz</div>
+    <div class="drw-sec">Apps</div>
+    <div class="drw-ch"><span style="font-size:11px">🛡️</span>Brand Guard</div>
+  </div>
+</div>
+
+<!-- END -->
+<div class="endcard" id="endcard">
+  <div class="endbox">
+    <div class="gl"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 1 0 9 9" stroke="#F5F5F0" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="3" fill="#D4AF37"/></svg></div>
+    <h2>One brand. One protocol.<br><em>Every tool on the same page.</em></h2>
+    <p>From scattered assets to a living Brand Intelligence Layer — set up, enforced, and put to work inside Slack.</p>
+    <div class="endstats"><div class="es"><div class="n">1</div><div class="l">Source of truth</div></div><div class="es"><div class="n">12</div><div class="l">Rules</div></div><div class="es"><div class="n">0</div><div class="l">Off-brand</div></div></div>
+    <button class="replay" id="replay">↻ Run it again</button>
+  </div>
+</div>
+
+<script>
+const OPERATORS={
+  arihant:{name:'Arihant Jain',av:'A',c:'#6f8763'},
+  yash:{name:'Yash Vats',av:'Y',c:'#c07d6f'},
+  alex:{name:'Alex Scholz',av:'X',c:'#8B9A9C'}
+};
+let OP='arihant';
+const AGENT_LABELS={core:'Clarity',icp:'ICP Agent',brand:'Brand Book Agent',bcp:'BCP Agent',campaign:'Campaign Agent',creative:'Creative Agent',outreach:'Outreach Agent'};
+
+const msgsEl=document.getElementById('msgs');
+const engLogEl=document.getElementById('engLog');
+
+function fmt(t){return t.replace(/\{op\}/g,OPERATORS[OP].name.split(' ')[0]);}
+function setInput(text){const c=document.getElementById('compIn');
+  if(text){c.classList.add('typing-txt');c.innerHTML=text+'<span class="caret"></span>';document.getElementById('sendBtn').classList.add('live');}
+  else{c.classList.remove('typing-txt');c.textContent='Message #clarity';document.getElementById('sendBtn').classList.remove('live');}}
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function appAv(){return `<svg viewBox="0 0 24 24" fill="none"><path d="M12 4a8 8 0 1 0 8 8" stroke="#e6cf8a" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="2.6" fill="#D4AF37"/></svg>`;}
+
+function fireTool(name){document.querySelector(`.chip[data-tool="${name}"]`)?.classList.add('fire');}
+function engLog(agentKey,text,ok){
+  const time=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}).replace(/^0/,'');
+  const e=document.createElement('div');e.className='lline'+(ok?' ok':'');
+  const ag=AGENT_LABELS[agentKey]||'Clarity';
+  e.innerHTML=`<span class="ts">${time}</span><span class="mk">${ok?'✓':'▸'}</span><span class="ag ${agentKey||'core'}">${ag}</span><span class="tx">${escapeHtml(text)}</span>`;
+  engLogEl.appendChild(e);engLogEl.scrollTop=engLogEl.scrollHeight;
+  if(!engLogEl.classList.contains('open'))while(engLogEl.children.length>3)engLogEl.removeChild(engLogEl.firstChild);
+}
+function resetEngine(){
+  document.querySelectorAll('.chip.fire').forEach(n=>n.classList.remove('fire'));
+  engLogEl.innerHTML='';
+}
+
+document.getElementById('engToggle').onclick=()=>{engLogEl.classList.toggle('open');document.getElementById('engToggle').classList.toggle('open');};
+document.getElementById('drwOpen').onclick=()=>{document.getElementById('drw').classList.add('open');document.getElementById('drwOverlay').classList.add('show');};
+document.getElementById('drwOverlay').onclick=()=>{document.getElementById('drw').classList.remove('open');document.getElementById('drwOverlay').classList.remove('show');};
+
+function card(inner,cls){return `<div class="card ${cls||''}">${inner}</div>`;}
+function CARDS(kind){
+  switch(kind){
+    case 'choose': return card(`<div class="ch"><span class="ico">◈</span>What do you want to do?</div>
+      <div class="opt"><span class="ico">✦</span><div class="ot"><div class="h">Build a new Brand Intelligence Layer</div><div class="d">Turn your assets into living brand memory</div></div></div>
+      <div class="opt"><span class="ico">▦</span><div class="ot"><div class="h">Open a brand you've already mapped</div><div class="d">Jump into an existing brand context</div></div></div>`);
+    case 'icp': return card(`<div class="ch"><span class="ico">🎯</span>ICP — ClarityHQ</div>
+      <div class="crow"><span class="k">Audience</span><span class="v" style="max-width:200px">Ambitious D2C brands, CMOs &amp; modern agencies</span></div>
+      <div class="crow"><span class="k">Context</span><span class="v">AI-powered commerce</span></div>
+      <div class="crow"><span class="k">Pain</span><span class="v">Fragmented brand intelligence</span></div>
+      <div class="crow"><span class="k">Need</span><span class="v">Unified brand memory</span></div>
+      <div class="cbtns"><span class="cbtn link">View full ICP</span></div>`);
+    case 'brandbook': return card(`<div class="ch"><span class="ico">📖</span>Brand Book — ClarityHQ · v1</div>
+      <div class="crow"><span class="k">Archetype</span><span class="v">Sage</span></div>
+      <div class="crow"><span class="k">Voice</span><span class="v" style="max-width:200px">Human-first, operationally grounded</span></div>
+      <div class="crow"><span class="k">Tone</span><span class="v">confident · direct · approachable</span></div>
+      <div class="palette">
+        <div class="sw" style="background:#F5F5F0"><span style="color:#6B5C4E">cream</span></div>
+        <div class="sw" style="background:#1A1410"><span style="color:#F5F5F0">ink</span></div>
+        <div class="sw" style="background:#A8B5A0"><span style="color:#fff">sage</span></div>
+        <div class="sw" style="background:#D4A59A"><span style="color:#fff">terra</span></div>
+        <div class="sw" style="background:#D4AF37"><span style="color:#1a1410">gold</span></div>
+      </div>
+      <div class="cbtns"><span class="cbtn link">Open Brand Book</span></div>`);
+    case 'bcp': return card(`<div class="ch"><span class="ico">🛡️</span>Brand Context Protocol — live</div>
+      <div style="font-size:11px;color:var(--stone);margin-bottom:5px">One endpoint every tool reads from.</div>
+      <div class="codeblk"><span class="u">api.brandcontextprotocol.com/clarityhq</span><span style="color:var(--gold-soft)">⧉</span></div>
+      <div class="cbtns"><span class="cbtn pri">Open in Claude Code</span><span class="cbtn">Copy</span></div>`,'bcp');
+    case 'check-fail': return card(`<div class="ch"><span class="ico">🛡️</span>Brand Voice Check <span class="badge">app</span></div>
+      <div class="bvc-top">
+        <div class="bvc-score"><div class="n bad">31</div><div class="o">/ 100</div></div>
+        <div class="bvc-meta"><div class="bvc-dec fail">🔴 FAIL</div>
+          <div class="bvc-sub">ClarityHQ · strictness standard<br>3 forbidden · 1 blocked · 1 pricing</div></div>
+      </div>
+      <div class="flag"><span class="ft block">forbidden</span><span class="fb"><span class="w">"fully automated"</span> <span class="arrow">→</span> <span class="alt">AI-enabled with human approval at every gate</span></span></div>
+      <div class="flag"><span class="ft block">forbidden</span><span class="fb"><span class="w">"guarantees results"</span> <span class="arrow">→</span> <span class="alt">designed to improve operational throughput</span></span></div>
+      <div class="flag"><span class="ft block">forbidden</span><span class="fb"><span class="w">"set it and forget it"</span> <span class="arrow">→</span> <span class="alt">always-on with continuous human oversight</span></span></div>
+      <div class="flag"><span class="ft block">tactic · block</span><span class="fb"><span class="w">"today only"</span> — false scarcity</span></div>
+      <div class="flag"><span class="ft warn">pricing</span><span class="fb"><span class="w">"50% off"</span> exceeds 30% cap</span></div>
+      <div class="checked">"Our <span class="strike">fully automated</span> platform <span class="strike">guarantees results</span> — <span class="strike">set it and forget it</span>. <span class="strike">50% off, today only</span>."</div>
+      <div class="cbtns"><span class="cbtn terra">Rewrite on-brand</span><span class="cbtn">Override</span></div>`,'fail');
+    case 'check-pass': return card(`<div class="ch"><span class="ico">🛡️</span>Brand Voice Check <span class="badge">app</span></div>
+      <div class="bvc-top">
+        <div class="bvc-score"><div class="n good">94</div><div class="o">/ 100</div></div>
+        <div class="bvc-meta"><div class="bvc-dec pass">🟢 PASS</div>
+          <div class="bvc-sub">ClarityHQ · strictness standard<br>On-voice. Within policy.</div></div>
+      </div>
+      <div class="rewrite">"Our AI-enabled platform — with human approval at every gate — is designed to improve operational throughput. Always-on, with continuous human oversight."</div>
+      <div class="cbtns"><span class="cbtn pri">Use this</span><span class="cbtn link">Send to #clarity-social</span></div>`,'pass');
+    case 'hypotheses': return card(`<div class="ch"><span class="ico">💡</span>3 angles, grounded in brand</div>
+      <div class="opt" data-hyp="1"><span class="ico">①</span><div class="ot"><div class="h">"Brand memory, not guidelines"</div><div class="d">Static PDF → living intelligence</div></div><span class="pct">84%</span></div>
+      <div class="opt" data-hyp="2"><span class="ico">②</span><div class="ot"><div class="h">"One source of truth, every tool"</div><div class="d">Cohesion across chaos</div></div><span class="pct">90%</span></div>
+      <div class="opt" data-hyp="3"><span class="ico">③</span><div class="ot"><div class="h">"Human-led, AI-powered"</div><div class="d">Judgment at every gate</div></div><span class="pct">79%</span></div>`);
+    case 'campaign': return card(`<div class="ch"><span class="ico">🚀</span>Campaign — "One Source of Truth"</div>
+      <div class="crow"><span class="k">North-star</span><span class="v">+ qualified demos</span></div>
+      <div class="crow"><span class="k">Channels</span><span class="v">LinkedIn · Email · Partners</span></div>
+      <div class="crow"><span class="k">Calendar</span><span class="v">6-week phased rollout</span></div>
+      <div class="crow"><span class="k">Guardrail</span><span class="v">All copy BCP-checked ✓</span></div>
+      <div class="cbtns"><span class="cbtn link">Open Campaign</span></div>`);
+    case 'brands': return card(`<div class="ch"><span class="ico">▦</span>Brands in your workspace</div>
+      <div class="brandrow" data-brand="clarity"><div class="bi" style="background:var(--ink)">C</div><div class="bt"><div class="h">ClarityHQ</div><div class="d">B2B · your brand</div></div><span class="tag">B2B</span></div>
+      <div class="brandrow" data-brand="ceremony"><div class="bi" style="background:var(--terra-ink)">C</div><div class="bt"><div class="h">Ceremony</div><div class="d">D2C client · 4 brands</div></div><span class="tag">D2C</span></div>`);
+    case 'posts': return card(`<div class="ch"><span class="ico">🎨</span>3 posts · Ceremony</div>
+      <div class="posts">
+        <div class="post" id="post1"><div class="g" style="background:linear-gradient(150deg,#A8B5A0,#6f8763)"></div><span class="lab">Mon</span><span class="tick">✓</span></div>
+        <div class="post" id="post2"><div class="g" style="background:linear-gradient(150deg,#B8A68A,#8a7659)"></div><span class="lab">Wed</span><span class="tick">✓</span></div>
+        <div class="post" id="post3"><div class="g" style="background:linear-gradient(150deg,#D4A59A,#c07d6f)"></div><span class="lab">Fri</span><span class="tick">✓</span></div>
+      </div>
+      <div class="cbtns"><span class="cbtn pri" id="approveBtn">Approve all</span><span class="cbtn">Changes</span></div>`);
+    case 'route': return card(`<div class="ch"><span class="ico">📤</span>Send to whom?</div>
+      <div class="opt" data-route="brand"><span class="ico">🎨</span><div class="ot"><div class="h">Brand Lead</div><div class="d">standard</div></div></div>
+      <div class="opt" data-route="growth"><span class="ico">📈</span><div class="ot"><div class="h">Growth Lead</div><div class="d">Alex · distribution</div></div></div>`);
+  }
+  return '';
+}
+
+const BEATS=[
+  {ch:0,who:'u',text:'Hey Clarity'},
+  {ch:0,who:'a',text:'Hey <b>{op}</b> 👋 Let\u2019s turn your brand into living intelligence. Build a new <span class="term">Brand Intelligence Layer</span>, or open an existing one?',card:'choose',agent:'core',bcp:[['session opened · {op}',0]]},
+  {ch:0,who:'u',text:'Build a new one ✦'},
+  {ch:0,who:'a',text:'Drop your brand assets — site, deck, docs. I\u2019ll build your <span class="term">brand memory</span> from it.'},
+  {ch:0,who:'u',text:'clarityhq.ai',attach:'🔗 clarityhq.ai'},
+  {ch:0,who:'a',text:'Reading it. Every layer starts with who it\u2019s for — pulling your <b>ICP</b>.',agent:'icp',tools:['apify','serper'],bcp:[['crawling · Apify',0],['enriching · Serper',0],['ICP extracted',1]]},
+  {ch:0,who:'a',text:'Here\u2019s who I\u2019m seeing.',card:'icp',agent:'icp'},
+  {ch:0,who:'u',text:'Spot on'},
+  {ch:0,who:'a',text:'Now your <b>Brand Book</b> — voice, positioning, visual tokens.',card:'brandbook',agent:'brand',bcp:[['synthesizing voice',0],['tokens compiled',1]]},
+  {ch:0,who:'a',text:'And here\u2019s what makes it <b>live</b>. Your <span class="term">Brand Context Protocol</span> — one guardrail every tool reads from.',card:'bcp',agent:'bcp',tools:['bcp','claude-code'],bcp:[['BCP compiled · v1.0.1',0],['endpoint exposed',1]]},
+  {ch:0,who:'a',text:'Want to watch it catch something before it goes out?'},
+  {ch:0,who:'u',text:'Yeah, test it'},
+  {ch:0,who:'a',text:'Paste a draft and I\u2019ll run a <b>Brand Voice Check</b>.'},
+  {ch:0,who:'u',text:'"Our fully automated platform guarantees results — set it and forget it. 50% off, today only."'},
+  {ch:0,who:'a',text:'Caught it:',card:'check-fail',agent:'bcp',tools:['bcp'],bcp:[['/brand-check · clarityhq',0],['evaluating 12 rules',0],['score 31/100 → FAIL',1]]},
+  {ch:0,who:'u',text:'Rewrite it on-brand'},
+  {ch:0,who:'a',text:'Done. Re-checked:',card:'check-pass',agent:'bcp',bcp:[['applying alternatives',0],['score 94/100 → PASS',1]]},
+  {ch:0,who:'a',text:'That\u2019s the protocol. Every draft, every tool, <span class="term">one source of truth</span>. Let\u2019s put it to work — a <b>campaign</b>.',card:'hypotheses',agent:'campaign',bcp:[['3 angles · BCP-scored',1]]},
+  {ch:0,who:'u',text:'Go with #2',select:{sel:'[data-hyp="2"]'}},
+  {ch:0,who:'a',text:'Built from that angle — every line BCP-checked.',card:'campaign',agent:'campaign',bcp:[['campaign assembled',1]]},
+  {ch:1,who:'a',text:'Want to see what\u2019s moving across your brands?'},
+  {ch:1,who:'u',text:'Show me my brands'},
+  {ch:1,who:'a',text:'Two in here. Where to?',card:'brands',agent:'core',bcp:[['loading workspace brands',1]]},
+  {ch:1,who:'u',text:'Open Ceremony',select:{sel:'[data-brand="ceremony"]'}},
+  {ch:1,who:'a',text:'Empty slot this week. Want me to draft posts?',agent:'creative',bcp:[['context · Ceremony',0],['gap found',1]]},
+  {ch:1,who:'u',text:'Yeah, generate'},
+  {ch:1,who:'a',text:'Three posts, BCP-checked.',card:'posts',agent:'creative',tools:['nano-banana','bcp'],bcp:[['3 drafts · BCP ✓',1]]},
+  {ch:1,who:'u',text:'Make #2 warmer',regen:'#post2'},
+  {ch:1,who:'a',text:'Updated #2. Better?',agent:'creative',bcp:[['regenerating variant 2',1]]},
+  {ch:1,who:'u',text:'Perfect, approve all',approve:true},
+  {ch:1,who:'a',text:'Scheduled ☑ Route the collateral?',card:'route',agent:'outreach',tools:['hubspot'],bcp:[['scheduled',1]]},
+  {ch:1,who:'u',text:'Send to Growth Lead',select:{sel:'[data-route="growth"]'}},
+  {ch:1,who:'a',text:'Done — <b>Alex</b> has it ✨',agent:'core',bcp:[['routed → Alex',0],['shared',1]]},
+];
+const CHAPTERS=['CH 1 · BUILD INTELLIGENCE LAYER','CH 2 · PUT IT TO WORK'];
+
+let idx=-1,playing=false,timer=null,typingEl=null;
+function pushMsg(b){
+  const time=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}).replace(/^0/,'');
+  const el=document.createElement('div');el.className='m '+(b.who==='a'?'app':'user');
+  if(b.who==='a'){
+    el.innerHTML=`<div class="av">${appAv()}</div><div class="bd"><div class="meta"><span class="who">Clarity</span><span class="badge">app</span><span class="t">${time}</span></div><div class="tx">${fmt(b.text)}</div>${b.card?CARDS(b.card):''}</div>`;
+  }else{
+    const o=OPERATORS[OP];
+    el.innerHTML=`<div class="av" style="background:${o.c}">${o.av}</div><div class="bd"><div class="meta"><span class="who">${o.name}</span><span class="t">${time}</span></div><div class="tx">${fmt(b.text)}</div>${b.attach?`<div class="attach">${b.attach}</div>`:''}</div>`;
+  }
+  msgsEl.appendChild(el);msgsEl.scrollTop=msgsEl.scrollHeight;return el;
+}
+function showTyping(){typingEl=document.createElement('div');typingEl.className='typing';typingEl.innerHTML=`<div class="av">${appAv()}</div><div class="bub"><i></i><i></i><i></i></div>`;msgsEl.appendChild(typingEl);msgsEl.scrollTop=msgsEl.scrollHeight;}
+function clearTyping(){if(typingEl){typingEl.remove();typingEl=null;}}
+function runEngine(b){
+  if(b.tools)b.tools.forEach(t=>fireTool(t));
+  if(b.bcp){let d=0;b.bcp.forEach(l=>{setTimeout(()=>engLog(b.agent||'core',fmt(l[0]),l[1]),d);d+=320;});}
+}
+function interact(b){
+  if(b.select){b.select.sel.split(',').forEach(s=>{const n=[...msgsEl.querySelectorAll(s)].pop();if(n)n.classList.add('sel');});}
+  if(b.regen){const p=[...msgsEl.querySelectorAll(b.regen)].pop();if(p){p.classList.add('regen');p.querySelector('.g').style.background='linear-gradient(150deg,#D4AF37,#b8902a)';}}
+  if(b.approve){msgsEl.querySelectorAll('.post').forEach(p=>p.classList.add('ok'));const a=[...msgsEl.querySelectorAll('#approveBtn')].pop();if(a)a.classList.add('sel');}
+}
+function renderBeat(i,animate){
+  const b=BEATS[i];
+  document.getElementById('chapterLbl').textContent=CHAPTERS[b.ch];
+  document.getElementById('counter').textContent=String(i+1).padStart(2,'0')+' / '+String(BEATS.length).padStart(2,'0');
+  document.getElementById('progfill').style.width=((i+1)/BEATS.length*100)+'%';
+  if(b.who==='u'){
+    setInput(fmt(b.text));
+    const send=()=>{setInput('');pushMsg(b);interact(b);runEngine(b);schedule(i);};
+    if(animate){clearTimeout(timer);timer=setTimeout(send,650);}else{setInput('');pushMsg(b);interact(b);runEngine(b);}
+  }else{
+    if(animate){showTyping();clearTimeout(timer);timer=setTimeout(()=>{clearTyping();pushMsg(b);interact(b);runEngine(b);schedule(i);},800);}
+    else{pushMsg(b);interact(b);runEngine(b);}
+  }
+}
+function schedule(i){if(!playing)return;const b=BEATS[i];let d=b.who==='u'?1000:1750;if(b.card)d+=800;if(b.bcp)d=Math.max(d,b.bcp.length*320+700);clearTimeout(timer);timer=setTimeout(()=>next(true),d);}
+function next(){if(idx>=BEATS.length-1){finish();return;}idx++;renderBeat(idx,true);}
+function rebuildTo(t){clearTimeout(timer);clearTyping();msgsEl.innerHTML='<div class="day"><span>Today</span></div>';resetEngine();setInput('');document.getElementById('endcard').classList.remove('show');for(let i=0;i<=t;i++)renderBeat(i,false);}
+function stepNext(){pause();if(idx>=BEATS.length-1){finish();return;}idx++;renderBeat(idx,false);}
+function prev(){pause();if(idx<=0)return;idx--;rebuildTo(idx);}
+function play(){if(idx>=BEATS.length-1){restart();return;}playing=true;document.getElementById('play').textContent='⏸';next();}
+function pause(){playing=false;clearTimeout(timer);clearTyping();document.getElementById('play').textContent='▶';}
+function toggle(){playing?pause():play();}
+function restart(){pause();idx=-1;msgsEl.innerHTML='<div class="day"><span>Today</span></div>';resetEngine();setInput('');document.getElementById('endcard').classList.remove('show');document.getElementById('progfill').style.width='0';setTimeout(play,250);}
+function finish(){pause();document.getElementById('progfill').style.width='100%';setTimeout(()=>document.getElementById('endcard').classList.add('show'),500);}
+
+document.getElementById('play').onclick=toggle;
+document.getElementById('next').onclick=stepNext;
+document.getElementById('prev').onclick=prev;
+document.getElementById('restart').onclick=restart;
+document.getElementById('replay').onclick=restart;
+
+document.getElementById('opSwitch').onclick=()=>{
+  const keys=Object.keys(OPERATORS);OP=keys[(keys.indexOf(OP)+1)%keys.length];const o=OPERATORS[OP];
+  document.getElementById('opSwitch').textContent=o.av;
+  restart();
+};
+
+// auto-scroll engine log to bottom on first beat (collapsed view shows latest)
+</script>
+</body>
+</html>
